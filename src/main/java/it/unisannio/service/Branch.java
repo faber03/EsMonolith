@@ -5,12 +5,17 @@ package it.unisannio.service;
 import java.util.List;
 
 import javax.ejb.Stateless;
-
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import it.unisannio.model.Account;
+import it.unisannio.model.AccountModel;
 import it.unisannio.model.Customer;
+import it.unisannio.model.CustomerModel;
 
 /**
  * Session Bean implementation class Branch
@@ -52,8 +57,10 @@ public class Branch implements BranchLocal {
 
 	public List<Account> getAccounts(String cf) {
 		//return em.createNamedQuery("Account.findAllCustomerAccounts", Account.class).setParameter("CF", cf).getResultList();
-
-		Customer c = getCustomer(cf);
+		
+		Customer c = em.find(Customer.class, cf);
+				
+		//CustomerModel c = getCustomer(cf);
 		return c.getAccounts();
 	}
 	public void deposit(int num, double a) throws Exception {
@@ -70,8 +77,19 @@ public class Branch implements BranchLocal {
 		Customer c = new Customer(cf, fn, ln);
 		em.persist(c);
 	}
-
-	public Customer getCustomer(String cf) {
-		return em.find(Customer.class, cf);
+	
+	//@Transactional(TxType.REQUIRED)
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public CustomerModel getCustomer(String cf) 
+	{
+		Customer c = em.find(Customer.class, cf);
+		
+		CustomerModel cm = new CustomerModel(c.getCF(), c.getFirstName(), c.getLastName());
+		
+		c.getAccounts().forEach(a -> {
+			cm.AddAccount(new AccountModel(a.getNumber(), a.getBalance(), a.getLastModified(), null));
+		});
+					
+		return cm;
 	}
 }

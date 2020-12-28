@@ -7,6 +7,8 @@ import java.util.List;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Entity implementation class for Entity: User
  *
@@ -20,7 +22,7 @@ public class Customer implements Serializable {
 	private String firstName;
 	private String lastName;
 	// Not used with relational models
-	@OneToMany(mappedBy="customer", cascade=CascadeType.REMOVE, fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="customer", cascade=CascadeType.REMOVE, fetch=FetchType.LAZY)	
 	private List<Account> accounts;
 	private static final long serialVersionUID = 1L;
 
@@ -53,7 +55,7 @@ public class Customer implements Serializable {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-
+		
 	public List<Account> getAccounts() {
 		accounts.size();
 		return this.accounts;

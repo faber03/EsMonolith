@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Entity implementation class for Entity: Account
  *
@@ -19,7 +21,7 @@ public class Account implements Serializable {
 	private double balance;
 	private Date lastModified;
 	@ManyToOne
-	//@JoinColumn(name="customerFK")
+	@JoinColumn(name="customer_CF")
 	private Customer customer;
 	private static final long serialVersionUID = 1L;
 
@@ -49,6 +51,8 @@ public class Account implements Serializable {
 	public void setNumber(int number) {
 		this.number = number;
 	}
+	
+	@JsonIgnore
 	public Customer getCustomer () {
 		return customer;
 	}

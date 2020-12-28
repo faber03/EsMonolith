@@ -6,6 +6,7 @@ import javax.ejb.Local;
 
 import it.unisannio.model.Account;
 import it.unisannio.model.Customer;
+import it.unisannio.model.CustomerModel;
 
 @Local
 public interface BranchLocal {
@@ -16,6 +17,6 @@ public interface BranchLocal {
 	public void deposit(int num, double a) throws Exception; // Substitute with a more specific exception type
 	public void withdraw(int num, double a) throws Exception;
 	public void createCustomer(String cf, String fn, String ln) throws Exception;
-	public Customer getCustomer(String cf);
+	public CustomerModel getCustomer(String cf);
 
 }

@@ -2,11 +2,18 @@ package it.unisannio.controller;
 
 
 import java.net.URI;
-
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 import javax.transaction.UserTransaction;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -17,12 +24,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import it.unisannio.model.Account;
 import it.unisannio.model.Customer;
+import it.unisannio.model.CustomerModel;
 import it.unisannio.service.BranchLocal;
 
 
@@ -89,7 +98,14 @@ public class BankController  {
 		Account a = branch.getAccount(accountNum);
 		ResponseBuilder builder = null;
 		try {
-			builder = request.evaluatePreconditions(a.getLastModified());
+			
+			Date lastModified = a.getLastModified();
+			
+			//es. request header:
+			//KEY: If-Modified-Since - VALUE: Sun, 27 Dec 2020 00:00:00 GMT
+			//la modifica sarà consentita solo se VALUE è maggiore della data di ultima modifica della risorsa		
+			builder = request.evaluatePreconditions(lastModified);
+			
 			if (builder != null) {
 				utx.begin();
 				branch.getAccount(accountNum).setBalance(amount);
@@ -157,12 +173,19 @@ public class BankController  {
 
 	@GET
 	@Path("customers/{custCF}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
+	//@Transactional(TxType.REQUIRED)
 	public Response getCustomer(@PathParam("custCF") String cf) {
 		try {
-			Customer c = branch.getCustomer(cf);
+			
+			CustomerModel c = branch.getCustomer(cf);
+			
 			if (c == null) Response.status(404).build();
-			return Response.ok(c).build();
+									
+			Response response = Response.ok(c, MediaType.APPLICATION_JSON).build();
+			
+			return response;
+		
 		} catch (Exception e) {
 			return Response.status(500).build();
 		}
